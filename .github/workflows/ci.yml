@@ -1,0 +1,38 @@
+name: Lab04 CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            compiler: g++
+          - os: ubuntu-latest
+            compiler: clang++
+          - os: windows-latest
+            compiler: cl
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure (Linux)
+        if: runner.os != 'Windows'
+        run: cmake -S . -B build -DCMAKE_CXX_COMPILER=${{ matrix.compiler }}
+
+      - name: Build (Linux)
+        if: runner.os != 'Windows'
+        run: cmake --build build
+
+      - name: Configure (Windows)
+        if: runner.os == 'Windows'
+        run: cmake -S . -B build
+
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        run: cmake --build build --config Release
